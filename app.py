@@ -4,7 +4,7 @@ st.set_page_config(page_title="ETH 套利回本计算器", layout="centered")
 
 st.title("ETH 套利回本价格计算器")
 st.markdown("""
-本工具用于计算在 aivora 和 bitunix 双平台套利时，综合手续费返还和体验金后，ETH 的回本价格。
+本工具用于计算在 aivora 和 bitunix 双平台套利时，综合手续费返还和体验金后，ETH 的回本价格点位。
 """)
 
 # 默认参数
@@ -26,7 +26,7 @@ with st.form("input_form"):
     leverage = st.number_input("杠杆倍数", value=defaults['leverage'], min_value=1, step=1)
     margin = st.number_input("保证金 (USD)", value=defaults['margin'], min_value=0.0, step=0.01)
     direction = st.selectbox("aivora 方向", ["long", "short"], index=0, format_func=lambda x: "做多" if x=="long" else "做空")
-    submitted = st.form_submit_button("计算回本价格")
+    submitted = st.form_submit_button("计算回本点位")
 
 if submitted:
     fee_rate = defaults['fee_rate']
@@ -55,8 +55,13 @@ if submitted:
         break_even_price = eth_price + delta_p
         move = "上涨"
 
-    st.success(f"回本价格：${break_even_price:,.2f}")
-    st.markdown(f"**ETH 需要{move} {abs(delta_p):.2f} 美元（{(abs(delta_p)/eth_price)*100:.2f}%）才能回本**")
+    price_diff = abs(break_even_price - eth_price)
+    percent_move = (price_diff / eth_price) * 100 if eth_price != 0 else 0
+
+    st.success(f"回本点位：${break_even_price:,.2f}")
+    st.markdown(f"**开仓价：${eth_price:,.2f}**")
+    st.markdown(f"**回本点位：${break_even_price:,.2f}**")
+    st.markdown(f"**与开仓价相差：{move} {price_diff:.2f} 美元（{percent_move:.2f}%）**")
 
     with st.expander("费用明细"):
         st.write(f"aivora 手续费: ${aivora_fee:,.2f}")
